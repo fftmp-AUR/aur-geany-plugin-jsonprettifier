@@ -1,29 +1,24 @@
-# Maintainer: Lukas Rose <public@lrose.de>
+# Maintainer: fft
+# Contributor: Lukas Rose <public@lrose.de>
+
 pkgname=geany-plugin-jsonprettifier
-pkgver=1.6.0
-pkgrel=2
+pkgver=1.6.1
+pkgrel=1
 pkgdesc="Clean up unformatted JSON in Geany editor"
 arch=('i686' 'x86_64')
 url="https://plugins.geany.org/jsonprettifier.html"
-license=('GPL2')
+license=('GPL-2.0-or-later')
 depends=('geany' 'yajl')
-makedepends=('cmake')
-source=("https://github.com/zhgzhg/Geany-JSON-Prettifier/archive/v$pkgver.tar.gz" "Makefile.patch")
-sha256sums=('3192d4d304cf1ce0bac78997a0ede9a88724e1f0fadbcf9a1968e9cff496740e'
-            '391e5b83f87b23ac2a01c8f3252f028f391361500b70ee4b29710267cc54fa49')
-
-prepare() {
-  cd "Geany-JSON-Prettifier-$pkgver"
-  patch --forward --strip=1 --input="${srcdir}/Makefile.patch"
-}
+source=("https://github.com/zhgzhg/Geany-JSON-Prettifier/archive/v${pkgver}.tar.gz")
+sha256sums=('9e37c755e90389256d028aa35e291615a97bb503d04a09e821f936adbe2a1e9b')
 
 build() {
-  cd "Geany-JSON-Prettifier-$pkgver"
-  make -j1
+  cd "Geany-JSON-Prettifier-${pkgver}"
+  # NB: upstream uses own yajl version. Here yajl library from archlinux repo is used instead.
+  gcc -DLOCALEDIR=\"\" -DGETTEXT_PACKAGE=\"zhgzhg\" geany_json_prettifier.c -fPIC -shared $(pkg-config --cflags geany) -lgeany -lyajl -o jsonprettifier.so
 }
 
 package() {
-  cd "Geany-JSON-Prettifier-$pkgver"
-  mkdir -p "$pkgdir/usr/lib/geany"
-  make -j1 DESTDIR="$pkgdir/" install
+  mkdir -p "${pkgdir}/usr/lib/geany"
+  cp "Geany-JSON-Prettifier-${pkgver}/jsonprettifier.so" "${pkgdir}/usr/lib/geany"
 }
